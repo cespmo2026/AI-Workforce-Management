@@ -67,7 +67,7 @@
     .sidebar-bottom strong { display: block; margin-bottom: 3px; color: #e7f1f7; font-weight: 600; }
     .workspace { min-width: 0; padding: 0 30px 36px; }
     .topbar {
-      display: flex; align-items: center; justify-content: space-between; min-height: 70px;
+      display: flex; align-items: center; justify-content: space-between; min-height: 52px;
       border-bottom: 1px solid rgba(40, 65, 83, .1); color: var(--ink-soft);
     }
     .crumb { display: flex; align-items: center; gap: 9px; font-size: 12px; }
@@ -81,9 +81,8 @@
     }
     .button:hover { background: white; border-color: rgba(24, 91, 130, .3); }
     .button svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-    .content { max-width: 1440px; margin: 0 auto; padding-top: 27px; }
+    .content { max-width: 1440px; margin: 0 auto; padding-top: 10px; }
     .page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 21px; }
-    .eyebrow { margin-bottom: 7px; color: var(--blue); font-size: 10px; font-weight: 750; text-transform: uppercase; letter-spacing: 1.1px; }
     h1 { margin: 0; color: #122b43; font-size: 27px; line-height: 1.2; font-weight: 650; letter-spacing: 0; }
     .page-subtitle { max-width: 720px; margin: 7px 0 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
     .snapshot { flex: 0 0 auto; padding: 8px 11px; border: 1px solid rgba(36, 77, 102, .12); border-radius: 8px; background: rgba(255,255,255,.55); color: #5a6f82; font-size: 11px; }
@@ -312,11 +311,11 @@
     };
 
     const pageMeta = {
-      overview: { label: "Overview", title: "AI Workforce Management Overview", eyebrow: "MANAGER DASHBOARD", subtitle: "A consolidated view of client delivery, internal initiatives, and team capacity." },
-      clients: { label: "AI Projects", title: "AI Client Projects", eyebrow: "CLIENT PORTFOLIO", subtitle: "Client engagements, delivery phase, commercial readiness, current update, and assigned resources." },
-      internal: { label: "Internal Delivery", title: "Internal Delivery", eyebrow: "INTERNAL PORTFOLIO", subtitle: "Internal AI initiatives with owners, delivery phase, scope, and assigned team." },
-      resources: { label: "AI Resources", title: "AI Resources", eyebrow: "TEAM CAPACITY", subtitle: "Resource roster, billable allocation, project assignments, and manager notes." },
-      interns: { label: "AI Interns", title: "AI Interns", eyebrow: "EARLY CAREER TEAM", subtitle: "Intern assignments, expertise, location, and current notes." }
+      overview: { label: "Overview", title: "AI Workforce Management Overview", subtitle: "A consolidated view of client delivery, internal initiatives, and team capacity." },
+      clients: { label: "AI Projects", title: "AI Client Projects", subtitle: "Client engagements, delivery phase, commercial readiness, current update, and assigned resources." },
+      internal: { label: "Internal Delivery", title: "Internal Delivery", subtitle: "Internal AI initiatives with owners, delivery phase, scope, and assigned team." },
+      resources: { label: "AI Resources", title: "AI Resources", subtitle: "Resource roster, billable allocation, project assignments, and manager notes." },
+      interns: { label: "AI Interns", title: "AI Interns", subtitle: "Intern assignments, expertise, location, and current notes." }
     };
 
     const animatedCountValues = new Map();
@@ -575,8 +574,8 @@
     function renderOverview({ animatePage = true } = {}) {
       const clientPhases = phaseBreakdown(portfolio.clients);
       const internalPhases = phaseBreakdown(portfolio.internal);
-      const billableCount = portfolio.resources.filter(row => row.billable.toUpperCase() === "Y").length;
-      const notBillableCount = portfolio.resources.filter(row => row.billable.toUpperCase() === "N").length;
+      const billableCount = portfolio.resources.filter(row => String(row.billable ?? "").trim().toUpperCase() === "Y").length;
+      const notBillableCount = portfolio.resources.filter(row => String(row.billable ?? "").trim().toUpperCase() === "N").length;
       const tbdCommercial = portfolio.clients.filter(row => row.billing === "TBD" || row.sow === "TBD").length;
       const pipeline = portfolio.clients.filter(row => row.phase === "Yet to be started");
       const metrics = [
@@ -586,7 +585,7 @@
         ["AI interns", portfolio.interns.length, "Across 2 project assignments", "#c18132"]
       ];
       content.innerHTML = `<div class="page-enter${animatePage ? "" : " no-enter"}">
-        <div class="page-heading"><div><div class="eyebrow">${pageMeta.overview.eyebrow}</div><h1>${pageMeta.overview.title}</h1><p class="page-subtitle">${pageMeta.overview.subtitle}</p></div><div class="snapshot">Source snapshot <strong>20 Aug</strong></div></div>
+        <div class="page-heading"><div><h1>${pageMeta.overview.title}</h1><p class="page-subtitle">${pageMeta.overview.subtitle}</p></div><div class="snapshot">Source snapshot <strong>20 Aug</strong></div></div>
         <section class="metrics" aria-label="Portfolio metrics">${metrics.map(([label, value, note, color]) => `<article class="metric" style="--metric-color:${color}"><div class="metric-label">${label}</div><div class="metric-value">${value}</div><div class="metric-note">${note}</div></article>`).join("")}</section>
         <div class="overview-grid">
           <section class="panel"><div class="panel-head"><div><h2 class="panel-title">Client delivery by phase</h2><p class="panel-caption">${portfolio.clients.length} recorded client projects</p></div><button class="panel-link" type="button" data-goto="clients">View projects →</button></div>${renderBars(clientPhases)}</section>
@@ -784,7 +783,7 @@
       })() : "";
 
       content.innerHTML = `<div class="page-enter${animatePage ? "" : " no-enter"}">
-        <div class="page-heading"><div><div class="eyebrow">${meta.eyebrow}</div><h1>${meta.title}</h1><p class="page-subtitle">${meta.subtitle}</p></div><div class="heading-actions"><div class="snapshot">Source snapshot <strong>20 Aug</strong></div>${["clients", "internal", "resources", "interns"].includes(activePage) ? `<button class="button create-button" type="button" id="open-create"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Create ${createLabel}</button>` : ""}</div></div>
+        <div class="page-heading"><div><h1>${meta.title}</h1><p class="page-subtitle">${meta.subtitle}</p></div><div class="heading-actions"><div class="snapshot">Source snapshot <strong>20 Aug</strong></div>${["clients", "internal", "resources", "interns"].includes(activePage) ? `<button class="button create-button" type="button" id="open-create"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Create ${createLabel}</button>` : ""}</div></div>
         ${resourceSummary}
         <section class="panel filter-panel"><div class="filter-row"><div class="field search-field"><label for="search-field">Search this sheet</label><input class="control" id="search-field" type="search" placeholder="Search names, projects, notes…" value="${escapeHtml(state.query || "")}"></div>${filters}<div class="filter-actions"><button class="button" type="button" id="clear-filters">Clear filters</button></div></div></section>
         ${createNotices[activePage] ? `<div class="notice" role="alert">${escapeHtml(createNotices[activePage])}</div>` : ""}
