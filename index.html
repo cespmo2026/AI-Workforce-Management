@@ -1,0 +1,1189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Workforce Management | CES Manager Dashboard</title>
+  <link rel="icon" type="image/webp" href="https://cesltd.com/wp-content/uploads/2025/02/ces_logo_blue.webp">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #14283d;
+      --ink-soft: #526579;
+      --muted: #718196;
+      --navy: #102b46;
+      --navy-2: #173d5d;
+      --blue: #1676a8;
+      --teal: #16897f;
+      --green: #287d63;
+      --amber: #ad6a1b;
+      --red: #aa4d4d;
+      --line: rgba(34, 63, 89, .13);
+      --surface: rgba(255, 255, 255, .78);
+      --surface-strong: #fff;
+      --canvas: #edf3f6;
+      --shadow: 0 12px 34px rgba(21, 48, 72, .08);
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(226, 239, 244, .96), rgba(244, 247, 248, .97) 46%, rgba(232, 241, 239, .94)),
+        repeating-linear-gradient(0deg, transparent 0 31px, rgba(40, 75, 99, .025) 31px 32px);
+      font-family: "Segoe UI", "Segoe UI Variable", Tahoma, sans-serif;
+      font-size: 14px;
+    }
+    button, input, select { font: inherit; }
+    button { color: inherit; }
+    .app { display: grid; grid-template-columns: 244px minmax(0, 1fr); min-height: 100vh; }
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; padding: 24px 16px 18px;
+      display: flex; flex-direction: column; gap: 28px; color: #e8f1f8;
+      background: linear-gradient(165deg, #102b46, #163b58 70%, #194b5b);
+      border-right: 1px solid rgba(255, 255, 255, .1);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; padding: 0 7px; }
+    .brand-mark {
+      display: block; flex: 0 0 auto; width: 80px; height: 46px; padding: 4px 6px; border-radius: 4px;
+      object-fit: contain; filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 2px #fff);
+    }
+    .brand-name { font-size: 14px; font-weight: 700; letter-spacing: .15px; }
+    .brand-sub { margin-top: 3px; color: #a9bdce; font-size: 11px; }
+    .nav-label { padding: 0 12px; color: #91aabd; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.1px; }
+    .nav { display: grid; gap: 5px; }
+    .nav button {
+      display: flex; align-items: center; gap: 12px; width: 100%; min-height: 42px; padding: 0 12px;
+      border: 1px solid transparent; border-radius: 8px; background: transparent; color: #c8d7e3;
+      text-align: left; cursor: pointer; transition: background .18s ease, color .18s ease, border-color .18s ease;
+    }
+    .nav button:hover { background: rgba(255,255,255,.08); color: white; }
+    .nav button[aria-current="page"] { color: #fff; background: rgba(201, 229, 240, .14); border-color: rgba(211, 237, 246, .16); box-shadow: inset 3px 0 #66c5bd; }
+    .nav-icon { display: grid; place-items: center; width: 22px; height: 22px; color: #a9c5d7; }
+    .nav-icon svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 1.7; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .sidebar-bottom { margin-top: auto; padding: 13px 12px 2px; border-top: 1px solid rgba(255,255,255,.13); color: #a9bdce; font-size: 11px; line-height: 1.5; }
+    .sidebar-bottom strong { display: block; margin-bottom: 3px; color: #e7f1f7; font-weight: 600; }
+    .workspace { min-width: 0; padding: 0 30px 36px; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between; min-height: 70px;
+      border-bottom: 1px solid rgba(40, 65, 83, .1); color: var(--ink-soft);
+    }
+    .crumb { display: flex; align-items: center; gap: 9px; font-size: 12px; }
+    .crumb strong { color: var(--ink); font-weight: 650; }
+    .crumb-sep { color: #9aa9b7; }
+    .top-actions { display: flex; gap: 8px; }
+    .button {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 35px; padding: 0 12px;
+      border: 1px solid var(--line); border-radius: 7px; background: rgba(255,255,255,.72); color: var(--ink-soft);
+      font-size: 12px; font-weight: 600; cursor: pointer; transition: background .15s ease, border-color .15s ease;
+    }
+    .button:hover { background: white; border-color: rgba(24, 91, 130, .3); }
+    .button svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .content { max-width: 1440px; margin: 0 auto; padding-top: 27px; }
+    .page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 21px; }
+    .eyebrow { margin-bottom: 7px; color: var(--blue); font-size: 10px; font-weight: 750; text-transform: uppercase; letter-spacing: 1.1px; }
+    h1 { margin: 0; color: #122b43; font-size: 27px; line-height: 1.2; font-weight: 650; letter-spacing: 0; }
+    .page-subtitle { max-width: 720px; margin: 7px 0 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+    .snapshot { flex: 0 0 auto; padding: 8px 11px; border: 1px solid rgba(36, 77, 102, .12); border-radius: 8px; background: rgba(255,255,255,.55); color: #5a6f82; font-size: 11px; }
+    .snapshot strong { color: #294660; font-weight: 650; }
+    .heading-actions { display: flex; align-items: center; gap: 9px; }
+    .create-button { min-height: 37px; padding: 0 13px; border-color: #1676a8; background: linear-gradient(135deg, #1676a8, #16897f); color: white; }
+    .create-button:hover { border-color: #126889; background: linear-gradient(135deg, #126889, #12766e); color: white; }
+    .create-button svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 18px; background: rgba(12, 31, 46, .42); }
+    .create-dialog { display: flex; flex-direction: column; width: min(700px, 100%); max-height: min(86vh, 700px); overflow: hidden; border: 1px solid rgba(34, 63, 89, .14); border-radius: 11px; background: #fff; box-shadow: 0 24px 70px rgba(12, 31, 46, .25); }
+    .dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding: 16px 20px 12px; border-bottom: 1px solid var(--line); }
+    .dialog-title { margin: 0; color: #15344e; font-size: 18px; font-weight: 700; }
+    .dialog-subtitle { margin: 4px 0 0; color: var(--muted); font-size: 11px; line-height: 1.45; }
+    .dialog-close { display: grid; place-items: center; flex: 0 0 auto; width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; color: #718196; font-size: 20px; cursor: pointer; }
+    .dialog-close:hover { background: #f0f5f7; color: #173d5d; }
+    .create-form { display: flex; min-height: 0; flex-direction: column; }
+    .dialog-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; overflow-y: auto; padding: 15px 20px 17px; }
+    .dialog-field { display: grid; align-content: start; gap: 4px; min-width: 0; }
+    .dialog-field.wide { grid-column: 1 / -1; }
+    .dialog-field label { color: #536a7e; font-size: 10px; font-weight: 700; }
+    .dialog-control { width: 100%; min-height: 34px; padding: 6px 9px; outline: none; border: 1px solid rgba(44, 73, 98, .17); border-radius: 6px; background: #fff; color: #263d52; font-size: 12px; }
+    textarea.dialog-control { min-height: 58px; resize: vertical; }
+    .dialog-control:focus { border-color: rgba(22, 118, 168, .62); box-shadow: 0 0 0 3px rgba(22,118,168,.09); }
+    .resource-picker { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
+    .resource-picker .dialog-control { min-width: 0; }
+    .resource-add { min-height: 34px; padding: 0 9px; font-size: 11px; }
+    .resource-selections { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 5px; }
+    .resource-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 7px; border: 1px solid rgba(22,118,168,.16); border-radius: 5px; background: #eaf4f7; color: #28566e; font-size: 10px; }
+    .resource-chip button { padding: 0; border: 0; background: transparent; color: inherit; font-size: 13px; line-height: 1; cursor: pointer; }
+    .dialog-error { grid-column: 1 / -1; margin: 0; color: #a43f3f; font-size: 12px; line-height: 1.45; }
+    .dialog-footer { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 11px 20px; border-top: 1px solid var(--line); background: #f8fafb; }
+    .dialog-footer .create-button { min-height: 35px; }
+    .dialog-footer .button { min-height: 35px; }
+    .create-button:disabled { opacity: .65; cursor: wait; }
+    .panel, .metric {
+      border: 1px solid rgba(255,255,255,.88); border-radius: var(--radius); background: var(--surface);
+      box-shadow: var(--shadow); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+    }
+    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 13px; margin-bottom: 15px; }
+    .metric { position: relative; overflow: hidden; min-height: 114px; padding: 17px 18px; }
+    .metric::after { content: ""; position: absolute; top: 0; right: 0; width: 66px; height: 3px; background: var(--metric-color, var(--blue)); opacity: .9; }
+    .metric-label { color: var(--ink-soft); font-size: 12px; font-weight: 600; }
+    .metric-value { margin-top: 11px; color: #132e47; font-size: 30px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+    .metric-note { margin-top: 8px; color: var(--muted); font-size: 11px; }
+    .overview-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(300px, .9fr); gap: 15px; margin-bottom: 15px; }
+    .panel { min-width: 0; padding: 18px; }
+    .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 17px; }
+    .panel-title { margin: 0; color: #18334c; font-size: 14px; font-weight: 700; }
+    .panel-caption { margin: 4px 0 0; color: var(--muted); font-size: 11px; line-height: 1.45; }
+    .panel-link { padding: 4px 0; border: 0; background: transparent; color: var(--blue); font-size: 11px; font-weight: 650; cursor: pointer; white-space: nowrap; }
+    .phase-groups { display: grid; gap: 15px; }
+    .phase-group { display: grid; grid-template-columns: 125px minmax(0,1fr) 28px; align-items: center; gap: 11px; }
+    .phase-label { overflow: hidden; color: #4e6175; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+    .bar-track { height: 9px; overflow: hidden; border-radius: 9px; background: #e8eef1; }
+    .bar-fill { height: 100%; min-width: 3px; border-radius: inherit; background: linear-gradient(90deg, #1679a8, #42a99a); transition: width .45s ease; }
+    .phase-count { color: #304a60; font-size: 11px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+    .mini-chart { display: grid; gap: 12px; }
+    .mini-row { display: grid; grid-template-columns: 104px minmax(0,1fr) 43px; align-items: center; gap: 10px; }
+    .mini-row .bar-fill { background: linear-gradient(90deg, #16897f, #49b39b); }
+    .mini-label { color: #526579; font-size: 11px; }
+    .mini-value { color: #304a60; font-size: 11px; font-weight: 650; text-align: right; }
+    .overview-bottom { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 15px; }
+    .compact-list { display: grid; }
+    .compact-row { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
+    .compact-row:first-child { padding-top: 0; border-top: 0; }
+    .compact-title { color: #28445d; font-size: 12px; font-weight: 650; }
+    .compact-detail { margin-top: 3px; color: var(--muted); font-size: 11px; line-height: 1.45; }
+    .tag { align-self: start; padding: 4px 7px; border: 1px solid rgba(71, 107, 126, .14); border-radius: 5px; background: rgba(232, 240, 243, .8); color: #526a7b; font-size: 10px; font-weight: 650; white-space: nowrap; }
+    .tag.blue { color: #155f86; border-color: rgba(22,118,168,.16); background: #e7f3f8; }
+    .tag.green { color: #247159; border-color: rgba(40,125,99,.18); background: #e8f4ef; }
+    .tag.amber { color: #92601e; border-color: rgba(173,106,27,.19); background: #fbf1e4; }
+    .filter-panel { margin-bottom: 13px; padding: 13px; }
+    .filter-row { display: flex; align-items: end; flex-wrap: wrap; gap: 9px; }
+    .field { display: grid; gap: 5px; min-width: 145px; }
+    .field.search-field { flex: 1 1 245px; min-width: 210px; }
+    .field label { color: #65778a; font-size: 10px; font-weight: 700; }
+    .control {
+      width: 100%; height: 36px; padding: 0 10px; outline: none; border: 1px solid rgba(44, 73, 98, .15);
+      border-radius: 7px; background: rgba(255,255,255,.84); color: #263d52; font-size: 12px;
+    }
+    .control:focus { border-color: rgba(22, 118, 168, .58); box-shadow: 0 0 0 3px rgba(22,118,168,.09); }
+    .filter-actions { display: flex; gap: 7px; padding-bottom: 0; }
+    .table-panel { overflow: hidden; padding: 0; }
+    .table-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 13px 16px; border-bottom: 1px solid var(--line); }
+    .result-count { color: #566b7e; font-size: 11px; }
+    .result-count strong { color: #203d56; font-size: 12px; }
+    .save-progress { color: #1676a8; font-size: 11px; font-weight: 650; }
+    .table-wrap { overflow: auto; max-height: min(67vh, 720px); }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12px; }
+    thead { position: sticky; top: 0; z-index: 2; }
+    th { padding: 10px 11px; border-bottom: 1px solid #dce5e9; background: rgba(241,246,248,.97); color: #53687b; font-size: 10px; font-weight: 750; text-align: left; text-transform: uppercase; letter-spacing: .3px; white-space: nowrap; }
+    th button { padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer; }
+    th button:hover { color: #1474a0; }
+    td { max-width: 360px; padding: 11px; border-bottom: 1px solid rgba(42, 73, 94, .09); color: #344b60; vertical-align: top; line-height: 1.45; }
+    tbody tr { background: rgba(255,255,255,.5); transition: background .12s ease; }
+    tbody tr.pending-row { background: #edf7fa; }
+    tbody tr:hover { background: rgba(236,246,248,.88); }
+    tbody tr:last-child td { border-bottom: 0; }
+    .cell-primary { color: #1d3a53; font-weight: 650; }
+    .cell-secondary { display: block; max-width: 340px; margin-top: 3px; overflow: hidden; color: #708195; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+    .cell-wrap { min-width: 180px; max-width: 320px; white-space: normal; }
+    .id-cell { color: #577086; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .pending-label { display: inline-block; margin-left: 7px; padding: 2px 5px; border-radius: 4px; background: #dceff5; color: #176889; font-size: 9px; font-weight: 700; }
+    .row-actions { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+    .row-action { display: inline-grid; place-items: center; width: 31px; min-height: 29px; padding: 0; border: 1px solid rgba(44, 73, 98, .16); border-radius: 6px; background: rgba(255,255,255,.82); color: #31536d; cursor: pointer; }
+    .row-action:hover { border-color: rgba(22, 118, 168, .42); background: #fff; color: #126889; }
+    .row-action.danger { color: #a34444; }
+    .row-action.danger:hover { border-color: rgba(170, 77, 77, .4); background: #fff7f7; color: #8e3030; }
+    .row-action:disabled { opacity: .55; cursor: wait; }
+    .row-action svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .delete-copy { margin: 0; color: #526579; font-size: 13px; line-height: 1.55; }
+    .delete-copy strong { color: #173d5d; }
+    .dialog-footer .danger-button { border-color: #aa4d4d; background: #aa4d4d; color: white; }
+    .dialog-footer .danger-button:hover { border-color: #8e3030; background: #8e3030; color: white; }
+    .dialog-footer .danger-button:disabled { opacity: .65; cursor: wait; }
+    .phase-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 7px; border-radius: 5px; color: #355c6c; background: #eaf2f4; font-size: 10px; font-weight: 650; white-space: nowrap; }
+    .phase-pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #4d9d9b; }
+    .phase-pill[data-tone="amber"] { color: #8d5d20; background: #fbf1e4; }
+    .phase-pill[data-tone="amber"]::before { background: #d8953d; }
+    .phase-pill[data-tone="blue"] { color: #255f83; background: #e9f2f8; }
+    .phase-pill[data-tone="blue"]::before { background: #4389b0; }
+    .phase-pill[data-tone="green"] { color: #2a705a; background: #e7f3ed; }
+    .phase-pill[data-tone="green"]::before { background: #49a17a; }
+    .empty { padding: 38px 20px; color: var(--muted); text-align: center; }
+    .notice { margin-bottom: 13px; padding: 10px 12px; border: 1px solid rgba(173,106,27,.16); border-radius: 8px; background: rgba(255,249,239,.72); color: #86612f; font-size: 11px; line-height: 1.45; }
+    .page-enter { animation: rise .25s ease both; }
+    .page-enter.no-enter { animation: none; }
+    @keyframes rise { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+    @media (max-width: 1050px) {
+      .app { grid-template-columns: 215px minmax(0,1fr); }
+      .workspace { padding-right: 20px; padding-left: 20px; }
+      .metrics { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .overview-grid, .overview-bottom { grid-template-columns: minmax(0,1fr); }
+    }
+    @media (max-width: 720px) {
+      .app { display: block; }
+      .sidebar { position: sticky; z-index: 5; top: 0; width: 100%; height: auto; padding: 10px 12px 8px; gap: 9px; }
+      .brand { gap: 9px; padding: 0 3px; }
+      .brand-mark { width: 72px; height: 40px; }
+      .brand-sub, .nav-label, .sidebar-bottom { display: none; }
+      .nav { display: flex; overflow-x: auto; gap: 5px; padding-bottom: 1px; scrollbar-width: thin; }
+      .nav button { flex: 0 0 auto; width: auto; min-height: 35px; padding: 0 9px; gap: 6px; font-size: 11px; }
+      .nav button[aria-current="page"] { box-shadow: inset 0 -2px #66c5bd; }
+      .nav-icon { width: 16px; height: 18px; }
+      .nav-icon svg { width: 15px; height: 15px; }
+      .workspace { padding: 0 13px 24px; }
+      .topbar { min-height: 52px; }
+      .top-actions .button { min-height: 32px; padding: 0 8px; font-size: 11px; }
+      .content { padding-top: 19px; }
+      .page-heading { align-items: flex-start; flex-direction: column; margin-bottom: 16px; }
+      .heading-actions { flex-wrap: wrap; }
+      h1 { font-size: 23px; }
+      .snapshot { align-self: flex-start; }
+      .dialog-head, .dialog-fields { padding-right: 15px; padding-left: 15px; }
+      .dialog-footer { padding-right: 15px; padding-left: 15px; }
+      .dialog-fields { gap: 9px; }
+    }
+    @media (max-width: 460px) {
+      .dialog-fields { grid-template-columns: minmax(0, 1fr); }
+      .dialog-field.wide { grid-column: auto; }
+      .modal-backdrop { padding: 8px; }
+      .create-dialog { max-height: 96vh; }
+      .metrics { gap: 9px; }
+      .metric { min-height: 100px; padding: 13px; }
+      .metric-value { font-size: 26px; }
+      .panel { padding: 14px; }
+      .filter-panel { padding: 10px; }
+      .field { flex: 1 1 calc(50% - 8px); min-width: 135px; }
+      .field.search-field { flex-basis: 100%; }
+      .filter-actions { width: 100%; }
+      .filter-actions .button { flex: 1; }
+      .phase-group { grid-template-columns: 100px minmax(0,1fr) 24px; gap: 7px; }
+      .mini-row { grid-template-columns: 82px minmax(0,1fr) 39px; gap: 7px; }
+      .table-toolbar { padding: 11px 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <img class="brand-mark" src="https://cesltd.com/wp-content/uploads/2025/02/ces_logo_blue.webp" alt="CES logo" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 160 56%27%3E%3Crect width=%27160%27 height=%2756%27 rx=%274%27 fill=%27white%27/%3E%3Ctext x=%278%27 y=%2742%27 font-family=%27Arial,sans-serif%27 font-size=%2740%27 font-weight=%27700%27 fill=%27%23102b46%27%3ECES%3C/text%3E%3C/svg%3E';">
+        <div><div class="brand-name">AI Workforce Management</div><div class="brand-sub">Manager workspace</div></div>
+      </div>
+      <div class="nav-label">Workspace</div>
+      <nav class="nav" aria-label="Dashboard pages">
+        <button type="button" data-page="overview" aria-current="page"><span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="8" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="11" width="7" height="10" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>Overview</button>
+        <button type="button" data-page="clients"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 10h.01M15 10h.01M9 14h.01M15 14h.01M10 21v-4h4v4"/></svg></span>AI Projects</button>
+        <button type="button" data-page="internal"><span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4V2m8 2V2M3 9h18M8 13h3m-3 3h7"/></svg></span>Internal Delivery</button>
+        <button type="button" data-page="resources"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm10 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>AI Resources</button>
+        <button type="button" data-page="interns"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="m2 9 10-5 10 5-10 5L2 9Z"/><path d="M6 11v5c3.5 3 8.5 3 12 0v-5M22 9v6"/></svg></span>AI Interns</button>
+      </nav>
+      <div class="sidebar-bottom"><strong>Source workbook</strong>GLOBAL AI Projects Tracker<br>Project update column: 20 Aug</div>
+    </aside>
+    <main class="workspace">
+      <div class="topbar">
+        <div class="crumb"><span>CES</span><span class="crumb-sep">/</span><strong id="crumb-title">Overview</strong></div>
+        <div class="top-actions">
+          <button class="button" id="reset-button" type="button" title="Clear filters on this page"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 2.64-6.36L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>Reset</button>
+          <button class="button" id="export-button" type="button" title="Export the filtered rows as an Excel table, with CSV fallback"><svg viewBox="0 0 24 24"><path d="M12 3v12m-4-4 4 4 4-4M5 17v3h14v-3"/></svg>Export Excel</button>
+        </div>
+      </div>
+      <div class="content" id="content" aria-live="polite"></div>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+  <script>
+    const SUPABASE_CONFIG = {
+      url: "https://foiujddkijgqgxsnwcyp.supabase.co",
+      anonKey: "sb_publishable_494GGZXX8iw28gd65jr-VA_DvO_epyC",
+      tables: {
+        clients: "clients",
+        internal: "internal",
+        resources: "resources",
+        interns: "interns"
+      }
+    };
+
+    let portfolio = {
+      clients: [],
+      internal: [],
+      resources: [],
+      interns: []
+    };
+
+    const pageMeta = {
+      overview: { label: "Overview", title: "AI Workforce Management Overview", eyebrow: "MANAGER DASHBOARD", subtitle: "A consolidated view of client delivery, internal initiatives, and team capacity." },
+      clients: { label: "AI Projects", title: "AI Client Projects", eyebrow: "CLIENT PORTFOLIO", subtitle: "Client engagements, delivery phase, commercial readiness, current update, and assigned resources." },
+      internal: { label: "Internal Delivery", title: "Internal Delivery", eyebrow: "INTERNAL PORTFOLIO", subtitle: "Internal AI initiatives with owners, delivery phase, scope, and assigned team." },
+      resources: { label: "AI Resources", title: "AI Resources", eyebrow: "TEAM CAPACITY", subtitle: "Resource roster, billable allocation, project assignments, and manager notes." },
+      interns: { label: "AI Interns", title: "AI Interns", eyebrow: "EARLY CAREER TEAM", subtitle: "Intern assignments, expertise, location, and current notes." }
+    };
+
+    const animatedCountValues = new Map();
+    const animatedBarWidths = new Map();
+    const animatedCountFrames = new Map();
+
+    function animateDisplayedCounts(root = content) {
+      const selectors = [".metric-value", ".phase-count", ".mini-value", ".result-count strong"];
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      root.querySelectorAll(selectors.join(",")).forEach(element => {
+        const text = element.textContent.trim();
+        if (!/^\d+(?:\.\d+)?%?$/.test(text)) return;
+        const match = text.match(/^(\d+(?:\.\d+)?)(%?)$/);
+        const target = Number(match[1]);
+        const suffix = match[2];
+        const label = element.closest(".metric")?.querySelector(".metric-label")?.textContent.trim()
+          || element.closest(".phase-group")?.querySelector(".phase-label")?.textContent.trim()
+          || element.closest(".mini-row")?.querySelector(".mini-label")?.textContent.trim()
+          || "record-count";
+        const key = `${activePage}:${element.className}:${label}`;
+        const previous = animatedCountValues.get(key);
+        animatedCountValues.set(key, target);
+        const previousFrame = animatedCountFrames.get(key);
+        if (previousFrame) cancelAnimationFrame(previousFrame);
+        if (reduceMotion || previous === target) {
+          element.textContent = `${target}${suffix}`;
+          animatedCountFrames.delete(key);
+          return;
+        }
+
+        const start = previous ?? 0;
+        const duration = 650;
+        const startTime = performance.now();
+        const tick = now => {
+          const progress = Math.min(1, (now - startTime) / duration);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const value = start + (target - start) * eased;
+          element.textContent = `${Number.isInteger(target) ? Math.round(value) : value.toFixed(1)}${suffix}`;
+          if (progress < 1) animatedCountFrames.set(key, requestAnimationFrame(tick));
+          else {
+            element.textContent = `${target}${suffix}`;
+            animatedCountFrames.delete(key);
+          }
+        };
+        animatedCountFrames.set(key, requestAnimationFrame(tick));
+      });
+    }
+
+    function animateDashboardBars(root = content) {
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      root.querySelectorAll(".bar-fill").forEach(element => {
+        const label = element.closest(".phase-group")?.querySelector(".phase-label")?.textContent.trim()
+          || element.closest(".mini-row")?.querySelector(".mini-label")?.textContent.trim();
+        if (!label) return;
+        const key = `${activePage}:bar:${label}`;
+        const target = Number.parseFloat(element.style.width) || 0;
+        const previous = animatedBarWidths.get(key);
+        animatedBarWidths.set(key, target);
+        const previousFrame = animatedCountFrames.get(key);
+        if (previousFrame) cancelAnimationFrame(previousFrame);
+        if (reduceMotion || previous === target) {
+          element.style.width = `${target}%`;
+          animatedCountFrames.delete(key);
+          return;
+        }
+        element.style.width = `${previous ?? 0}%`;
+        animatedCountFrames.set(key, requestAnimationFrame(() => {
+          element.style.width = `${target}%`;
+          animatedCountFrames.delete(key);
+        }));
+      });
+    }
+
+    const tableConfig = {
+      clients: {
+        rows: portfolio.clients,
+        filters: [["client", "Client"], ["phase", "Phase"], ["type", "Project type"], ["manager", "Delivery manager"], ["billing", "Billing"], ["sow", "SOW"]],
+        columns: [
+          ["id", "Project ID", "id"], ["client", "Client", "primary"], ["details", "Project / scope", "scope"], ["owner", "Owner", ""],
+          ["phase", "Current phase", "phase"], ["manager", "Delivery manager", ""], ["billing", "Billing", "tag"], ["sow", "SOW", "tag"],
+          ["resources", "Resources", "wrap"], ["update", "Latest update", "wrap"]
+        ], searchFields: ["id", "client", "owner", "type", "details", "description", "phase", "manager", "billing", "sow", "update", "resources"]
+      },
+      internal: {
+        rows: portfolio.internal,
+        filters: [["phase", "Phase"], ["type", "Project type"], ["owner", "Owner"]],
+        columns: [["id", "Project ID", "id"], ["name", "Project", "primary"], ["details", "Project / scope", "scope"], ["owner", "Owner", "wrap"], ["type", "Type", ""], ["phase", "Current phase", "phase"], ["resources", "Resources", "wrap"]],
+        searchFields: ["id", "name", "details", "owner", "type", "description", "phase", "resources"]
+      },
+      resources: {
+        rows: portfolio.resources,
+        filters: [["designation", "Designation"], ["expertise", "Expertise"], ["location", "Location"], ["billable", "Billable"]],
+        columns: [["number", "No.", "id"], ["name", "Resource", "primary"], ["designation", "Designation", "wrap"], ["expertise", "Expertise", ""], ["location", "Location", ""], ["billable", "Billable", "tag"], ["projects", "Projects", "wrap"], ["comments", "Comments", "wrap"]],
+        searchFields: ["number", "name", "designation", "expertise", "location", "billable", "project1", "project2", "project3", "comments"]
+      },
+      interns: {
+        rows: portfolio.interns,
+        filters: [["expertise", "Expertise"], ["location", "Location"], ["project", "Project"]],
+        columns: [["number", "No.", "id"], ["name", "Intern", "primary"], ["designation", "Designation", "wrap"], ["expertise", "Expertise", ""], ["location", "Location", ""], ["project", "Project", ""], ["comments", "Comments", "wrap"]],
+        searchFields: ["number", "name", "designation", "expertise", "location", "project", "comments"]
+      }
+    };
+
+    let activePage = "overview";
+    let sortState = { key: "id", direction: 1 };
+    const activeFilters = {};
+    const content = document.getElementById("content");
+    let supabaseClient = null;
+    let portfolioSubscription = null;
+    let createModalOpen = false;
+    let createSubmitting = false;
+    let createError = "";
+    let selectedCreateResources = [];
+    let createFormDraft = {};
+    let editOriginal = null;
+    let editModalPage = null;
+    let editDraft = {};
+    let editSubmitting = false;
+    let editError = "";
+    let deleteTarget = null;
+    let deleteModalPage = null;
+    let deleteSubmitting = false;
+    let deleteError = "";
+    const createNotices = { clients: "", internal: "" };
+    const primaryKeyByPage = { clients: "id", internal: "id", resources: "number", interns: "number" };
+    const recordKey = (page, row) => row[primaryKeyByPage[page]];
+    const rowLabel = (page, row) => row.client || row.name || row.number || row.id || `${pageMeta[page].label} record`;
+    const escapeHtml = value => String(value ?? "").replace(/[&<>\"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+    const uniqueValues = (rows, key) => [...new Set(rows.map(row => row[key]).filter(value => value && String(value).trim()))].sort((a, b) => String(a).localeCompare(String(b)));
+    function mutationMatchMode(page, row) {
+      const keyName = primaryKeyByPage[page];
+      const key = row[keyName];
+      if (key !== null && key !== undefined && String(key).trim() !== "" &&
+          portfolio[page].filter(candidate => String(candidate[keyName]) === String(key)).length === 1) return "key";
+      const fields = Object.keys(row).filter(field => !field.startsWith("_"));
+      if (!fields.length || fields.some(field => {
+        const value = row[field];
+        return value !== null && !["string", "number", "boolean"].includes(typeof value);
+      })) return null;
+      const exactMatches = portfolio[page].filter(candidate =>
+        fields.every(field => Object.is(candidate[field], row[field])) &&
+        Object.keys(candidate).filter(field => !field.startsWith("_")).length === fields.length
+      );
+      return exactMatches.length === 1 ? "row" : null;
+    }
+    function addMutationFilter(query, page, row) {
+      if (mutationMatchMode(page, row) === "key") {
+        return query.eq(primaryKeyByPage[page], row[primaryKeyByPage[page]]);
+      }
+      if (mutationMatchMode(page, row) !== "row") {
+        throw new Error("This row cannot be safely identified uniquely. Refresh the table or resolve its duplicate/missing fields first.");
+      }
+      return Object.entries(row).filter(([field]) => !field.startsWith("_")).reduce((filteredQuery, [field, value]) =>
+        value === null ? filteredQuery.is(field, null) : filteredQuery.eq(field, value), query
+      );
+    }
+
+    const hasSupabaseConfig = () => {
+      return !!(SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey && !SUPABASE_CONFIG.url.includes("YOUR_SUPABASE_URL") && !SUPABASE_CONFIG.anonKey.includes("YOUR_SUPABASE_ANON_KEY"));
+    };
+
+    function applyPortfolioData(data) {
+      if (!data || typeof data !== "object") return;
+      const nextPortfolio = {
+        clients: Array.isArray(data.clients) ? data.clients : [],
+        internal: Array.isArray(data.internal) ? data.internal : [],
+        resources: Array.isArray(data.resources) ? data.resources : [],
+        interns: Array.isArray(data.interns) ? data.interns : []
+      };
+      ["clients", "internal", "resources", "interns"].forEach(key => {
+        const pendingRows = portfolio[key].filter(row => row._pendingCreate);
+        nextPortfolio[key] = [
+          ...pendingRows.filter(pending => !nextPortfolio[key].some(row => String(recordKey(key, row)) === String(recordKey(key, pending)))),
+          ...nextPortfolio[key]
+        ];
+      });
+      portfolio = nextPortfolio;
+      tableConfig.clients.rows = portfolio.clients;
+      tableConfig.internal.rows = portfolio.internal;
+      tableConfig.resources.rows = portfolio.resources;
+      tableConfig.interns.rows = portfolio.interns;
+      render({ animatePage: false });
+    }
+
+    async function fetchSupabaseTable(tableName, fallback = []) {
+      if (!supabaseClient) return fallback;
+      try {
+        const { data, error } = await supabaseClient.from(tableName).select("*");
+        if (error) {
+          console.error(`Supabase fetch failed for ${tableName}:`, error.message);
+          return [];
+        }
+        return Array.isArray(data) ? data : [];
+      } catch (error) {
+        console.error(`Supabase request failed for ${tableName}:`, error);
+        return [];
+      }
+    }
+
+    async function loadPortfolioFromSupabase() {
+      if (!hasSupabaseConfig()) {
+        applyPortfolioData({ clients: [], internal: [], resources: [], interns: [] });
+        return;
+      }
+      const [clients, internal, resources, interns] = await Promise.all([
+        fetchSupabaseTable(SUPABASE_CONFIG.tables.clients, []),
+        fetchSupabaseTable(SUPABASE_CONFIG.tables.internal, []),
+        fetchSupabaseTable(SUPABASE_CONFIG.tables.resources, []),
+        fetchSupabaseTable(SUPABASE_CONFIG.tables.interns, [])
+      ]);
+      applyPortfolioData({ clients, internal, resources, interns });
+    }
+
+    function subscribeToPortfolioChanges() {
+      if (!supabaseClient || portfolioSubscription) return;
+      const channel = supabaseClient.channel("portfolio-live-sync");
+      Object.values(SUPABASE_CONFIG.tables).forEach(tableName => {
+        channel.on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: tableName },
+          () => {
+            loadPortfolioFromSupabase();
+          }
+        );
+      });
+      channel.subscribe();
+      portfolioSubscription = channel;
+    }
+
+    function initSupabaseLiveSync() {
+      if (!hasSupabaseConfig() || !window.supabase) return;
+      supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+      loadPortfolioFromSupabase();
+      subscribeToPortfolioChanges();
+    }
+
+    function phaseTone(phase) {
+      const value = String(phase || "").toLowerCase();
+      if (value.includes("yet to be")) return "amber";
+      if (value.includes("development")) return "blue";
+      if (value.includes("incubation")) return "amber";
+      return "green";
+    }
+
+    function phaseBreakdown(rows) {
+      const counts = new Map();
+      rows.forEach(row => counts.set(row.phase || "Not recorded", (counts.get(row.phase || "Not recorded") || 0) + 1));
+      return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    }
+
+    function renderBars(rows, className = "phase-groups") {
+      const max = Math.max(1, ...rows.map(([, count]) => count));
+      return `<div class="${className}">${rows.map(([label, count]) => `<div class="${className === "mini-chart" ? "mini-row" : "phase-group"}"><span class="${className === "mini-chart" ? "mini-label" : "phase-label"}">${escapeHtml(label)}</span><span class="bar-track"><span class="bar-fill" style="display:block;width:${Math.max(3, count / max * 100)}%"></span></span><span class="${className === "mini-chart" ? "mini-value" : "phase-count"}">${count}</span></div>`).join("")}</div>`;
+    }
+
+    function renderOverview({ animatePage = true } = {}) {
+      const clientPhases = phaseBreakdown(portfolio.clients);
+      const internalPhases = phaseBreakdown(portfolio.internal);
+      const billableCount = portfolio.resources.filter(row => row.billable.toUpperCase() === "Y").length;
+      const notBillableCount = portfolio.resources.filter(row => row.billable.toUpperCase() === "N").length;
+      const tbdCommercial = portfolio.clients.filter(row => row.billing === "TBD" || row.sow === "TBD").length;
+      const pipeline = portfolio.clients.filter(row => row.phase === "Yet to be started");
+      const metrics = [
+        ["Client projects", portfolio.clients.length, `${clientPhases.find(([phase]) => phase === "Development")?.[1] || 0} in development`, "#1978a5"],
+        ["Internal initiatives", portfolio.internal.length, `${internalPhases.find(([phase]) => phase === "UAT")?.[1] || 0} in UAT`, "#16897f"],
+        ["AI resources", portfolio.resources.length, `${billableCount} marked billable`, "#4d8a6b"],
+        ["AI interns", portfolio.interns.length, "Across 2 project assignments", "#c18132"]
+      ];
+      content.innerHTML = `<div class="page-enter${animatePage ? "" : " no-enter"}">
+        <div class="page-heading"><div><div class="eyebrow">${pageMeta.overview.eyebrow}</div><h1>${pageMeta.overview.title}</h1><p class="page-subtitle">${pageMeta.overview.subtitle}</p></div><div class="snapshot">Source snapshot <strong>20 Aug</strong></div></div>
+        <section class="metrics" aria-label="Portfolio metrics">${metrics.map(([label, value, note, color]) => `<article class="metric" style="--metric-color:${color}"><div class="metric-label">${label}</div><div class="metric-value">${value}</div><div class="metric-note">${note}</div></article>`).join("")}</section>
+        <div class="overview-grid">
+          <section class="panel"><div class="panel-head"><div><h2 class="panel-title">Client delivery by phase</h2><p class="panel-caption">${portfolio.clients.length} recorded client projects</p></div><button class="panel-link" type="button" data-goto="clients">View projects →</button></div>${renderBars(clientPhases)}</section>
+          <section class="panel"><div class="panel-head"><div><h2 class="panel-title">Resource billing mix</h2><p class="panel-caption">As recorded in the AI Resources sheet</p></div><button class="panel-link" type="button" data-goto="resources">View resources →</button></div>${renderBars([["Billable", billableCount], ["Non-billable", notBillableCount], ["Not recorded", portfolio.resources.length - billableCount - notBillableCount]], "mini-chart")}</section>
+        </div>
+        <div class="overview-bottom">
+          <section class="panel"><div class="panel-head"><div><h2 class="panel-title">Internal delivery</h2><p class="panel-caption">Initiatives grouped by current phase</p></div><button class="panel-link" type="button" data-goto="internal">Open page →</button></div>${renderBars(internalPhases, "mini-chart")}</section>
+          <section class="panel"><div class="panel-head"><div><h2 class="panel-title">Manager review</h2><p class="panel-caption">Items to keep visible in the portfolio conversation</p></div></div><div class="compact-list"><div class="compact-row"><div><div class="compact-title">Commercial details to confirm</div><div class="compact-detail">${tbdCommercial} client projects have billing marked TBD; validate commercial readiness before kickoff.</div></div><span class="tag amber">${tbdCommercial} projects</span></div><div class="compact-row"><div><div class="compact-title">Projects yet to start</div><div class="compact-detail">${pipeline.map(row => escapeHtml(row.client)).join(", ")}. Staffing and start-date notes are in the project updates.</div></div><span class="tag blue">${pipeline.length} projects</span></div><div class="compact-row"><div><div class="compact-title">Internal work in incubation</div><div class="compact-detail">${internalPhases.find(([phase]) => phase === "Incubation")?.[1] || 0} initiative is recorded in the incubation phase.</div></div><span class="tag green">Internal</span></div></div></section>
+        </div>
+        <div class="notice" style="margin-top:15px">The source workbook’s status cells are blank, so this dashboard uses the recorded phase, billing, and SOW fields without inferring status from cell colors.</div>
+      </div>`;
+      animateDisplayedCounts();
+      animateDashboardBars();
+    }
+
+    function getCell(row, key) {
+      if (key === "projects") return [row.project1, row.project2, row.project3].filter(Boolean).join(", ") || "—";
+      return row[key] || "—";
+    }
+
+    function renderCell(row, [key, label, style]) {
+      const raw = getCell(row, key);
+      const safe = escapeHtml(raw);
+      if (style === "id") return `<td class="id-cell">${safe}${row._pendingCreate ? '<span class="pending-label">Saving…</span>' : ""}</td>`;
+      if (style === "primary") {
+        const secondary = key === "name" ? row.type : key === "client" ? row.id : row.designation;
+        return `<td><span class="cell-primary">${safe}</span>${secondary ? `<span class="cell-secondary">${escapeHtml(secondary)}</span>` : ""}</td>`;
+      }
+      if (style === "scope") {
+        const secondary = row.description;
+        return `<td class="cell-wrap"><span class="cell-primary">${safe}</span>${secondary ? `<span class="cell-secondary" title="${escapeHtml(secondary)}">${escapeHtml(secondary)}</span>` : ""}</td>`;
+      }
+      if (style === "phase") return `<td><span class="phase-pill" data-tone="${phaseTone(raw)}">${safe}</span></td>`;
+      if (style === "tag") {
+        const tone = String(raw).toLowerCase() === "yes" || String(raw).toLowerCase() === "y" || String(raw).toLowerCase() === "signed" ? "green" : String(raw).toLowerCase() === "tbd" ? "amber" : "";
+        return `<td><span class="tag ${tone}">${safe}</span></td>`;
+      }
+      return `<td class="${style === "wrap" ? "cell-wrap" : ""}">${safe}</td>`;
+    }
+
+    function filteredRows(config, page = activePage, sort = sortState) {
+      const state = activeFilters[page] || {};
+      const query = (state.query || "").trim().toLowerCase();
+      return config.rows.filter(row => {
+        if (query && !config.searchFields.some(key => String(key === "projects" ? getCell(row, key) : row[key] || "").toLowerCase().includes(query))) return false;
+        return config.filters.every(([key]) => !state[key] || String(row[key] || "") === state[key]);
+      }).sort((a, b) => {
+        const av = String(getCell(a, sort.key) || "").toLowerCase();
+        const bv = String(getCell(b, sort.key) || "").toLowerCase();
+        return av.localeCompare(bv, undefined, { numeric: true }) * sort.direction;
+      });
+    }
+
+    function renderDataPage({ animatePage = false } = {}) {
+      const meta = pageMeta[activePage];
+      const config = tableConfig[activePage];
+      const state = activeFilters[activePage] || (activeFilters[activePage] = {});
+      const rows = filteredRows(config);
+      const isSaving = config.rows.some(row => row._pendingCreate);
+      const filters = config.filters.map(([key, label]) => `<div class="field"><label for="filter-${key}">${label}</label><select class="control filter-select" id="filter-${key}" data-filter="${key}"><option value="">All ${label.toLowerCase()}s</option>${uniqueValues(config.rows, key).map(value => `<option value="${escapeHtml(value)}" ${state[key] === value ? "selected" : ""}>${escapeHtml(value)}</option>`).join("")}</select></div>`).join("");
+      const headings = config.columns.map(column => `<th><button type="button" data-sort="${column[0]}" title="Sort by ${escapeHtml(column[1])}">${escapeHtml(column[1])}${sortState.key === column[0] ? (sortState.direction === 1 ? " ↑" : " ↓") : ""}</button></th>`).join("") + "<th>Actions</th>";
+      const body = rows.length ? rows.map(row => {
+        const rowIndex = portfolio[activePage].indexOf(row);
+        const disabled = row._pendingCreate || !mutationMatchMode(activePage, row);
+        const disabledAttribute = disabled ? "disabled" : "";
+        const actionTitle = disabled && !row._pendingCreate ? 'title="This row cannot be uniquely identified in Supabase"' : "";
+        return `<tr class="${row._pendingCreate ? "pending-row" : ""}">${config.columns.map(column => renderCell(row, column)).join("")}<td><div class="row-actions"><button class="row-action" type="button" data-edit-row="${rowIndex}" ${disabledAttribute} ${actionTitle} aria-label="Edit ${escapeHtml(rowLabel(activePage, row))}" title="Edit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5 5 5M4 20l4.5-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20Z"/></svg></button><button class="row-action danger" type="button" data-delete-row="${rowIndex}" ${disabledAttribute} ${actionTitle} aria-label="Delete ${escapeHtml(rowLabel(activePage, row))}" title="Delete"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M5 7l1 14h12l1-14M9 7V4h6v3"/></svg></button></div></td></tr>`;
+      }).join("") : `<tr><td colspan="${config.columns.length + 1}" class="empty">No rows match these filters.</td></tr>`;
+
+      const createFields = activePage === "clients"
+        ? [
+          ["id", "Project ID", true], ["client", "Client", true], ["details", "Project / scope", false, "textarea", true],
+          ["description", "Description", false, "textarea", true], ["owner", "Owner"], ["type", "Project type"],
+          ["phase", "Current phase"], ["manager", "Delivery manager"], ["billing", "Billing", false, "billing"],
+          ["sow", "SOW", false, "sow"], ["resources", "Resources", false, "resources", true], ["update", "Latest update", false, "textarea", true]
+        ]
+        : activePage === "internal" ? [
+          ["id", "Project ID", true], ["name", "Project", true], ["details", "Project / scope", false, "textarea", true],
+          ["description", "Description", false, "textarea", true], ["owner", "Owner"], ["type", "Type"],
+          ["phase", "Current phase"], ["resources", "Resources", false, "resources", true]
+        ]
+        : activePage === "resources" ? [
+          ["number", "No.", true, "number"], ["name", "Resource name", true], ["designation", "Designation"],
+          ["expertise", "Expertise"], ["location", "Location"], ["billable", "Billable", false, "billable-flag"],
+          ["project1", "Project 1"], ["project2", "Project 2"], ["project3", "Project 3"], ["comments", "Comments", false, "textarea", true]
+        ] : [
+          ["number", "No.", true, "number"], ["name", "Intern name", true], ["designation", "Designation"],
+          ["expertise", "Expertise"], ["location", "Location"], ["project", "Project"],
+          ["comments", "Comments", false, "textarea", true]
+        ];
+      const resourceOptions = uniqueValues(portfolio.resources, "name");
+      const selectValues = key => {
+        if (key === "billing") {
+          const existing = uniqueValues(config.rows, key);
+          const storedValue = (aliases, fallback) => existing.find(value => aliases.includes(String(value).trim().toUpperCase())) || fallback;
+          return [
+            [storedValue(["Y", "YES"], "Yes"), "Yes"],
+            [storedValue(["N", "NO"], "No"), "No"],
+            [storedValue(["TBD"], "TBD"), "TBD"]
+          ];
+        }
+        if (key === "billable-flag") {
+          const existing = uniqueValues(config.rows, "billable");
+          const flagValue = (aliases, fallback) => existing.find(value => aliases.includes(String(value).trim().toUpperCase())) || fallback;
+          return [
+            [flagValue(["Y", "YES"], "Y"), "Yes"],
+            [flagValue(["N", "NO"], "N"), "No"]
+          ];
+        }
+        const existing = uniqueValues(config.rows, key);
+        const values = existing.length ? existing : ["Signed", "TBD"];
+        return values.map(value => [value, value]);
+      };
+      const createLabel = activePage === "clients" ? "project" : activePage === "internal" ? "deliverable" : activePage === "resources" ? "resource" : "intern";
+      const createTitle = activePage === "clients" ? "Create project" : activePage === "internal" ? "Create internal deliverable" : activePage === "resources" ? "Create AI resource" : "Create AI intern";
+      const createDialog = createModalOpen ? `
+        <div class="modal-backdrop" data-modal-backdrop="create">
+          <section class="create-dialog" role="dialog" aria-modal="true" aria-labelledby="create-dialog-title">
+            <div class="dialog-head">
+              <div><h2 class="dialog-title" id="create-dialog-title">${createTitle}</h2><p class="dialog-subtitle">Add a record using the same fields shown in this tracker.</p></div>
+              <button class="dialog-close" type="button" data-close-create aria-label="Close dialog">×</button>
+            </div>
+            <form class="create-form" id="create-form">
+              <div class="dialog-fields">
+                ${createFields.map(([key, label, required, fieldType, wide]) => {
+                  const inputId = `create-${key}`;
+                  const fieldValue = String(createFormDraft[key] ?? "");
+                  let control;
+                  if (fieldType === "textarea") {
+                    control = `<textarea class="dialog-control" id="${inputId}" name="${key}" ${required ? "required" : ""}>${escapeHtml(fieldValue)}</textarea>`;
+                  } else if (fieldType === "resources") {
+                    control = `<div class="resource-picker"><select class="dialog-control" id="create-resources-picker"><option value="">${resourceOptions.length ? "Select a resource" : "No resources available"}</option>${resourceOptions.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("")}</select><button class="button resource-add" type="button" id="add-resource" ${resourceOptions.length ? "" : "disabled"}>Add</button><input type="hidden" id="create-resources-value" name="${key}" value="${escapeHtml(selectedCreateResources.join(", "))}"><div class="resource-selections" id="resource-selections">${selectedCreateResources.map((name, index) => `<span class="resource-chip">${escapeHtml(name)}<button type="button" data-remove-resource="${index}" aria-label="Remove ${escapeHtml(name)}">×</button></span>`).join("")}</div></div>`;
+                  } else if (fieldType === "billing" || fieldType === "sow" || fieldType === "billable-flag") {
+                    control = `<select class="dialog-control" id="${inputId}" name="${key}"><option value="">Select ${escapeHtml(label.toLowerCase())}</option>${selectValues(fieldType).map(([value, optionLabel]) => `<option value="${escapeHtml(value)}" ${fieldValue === value ? "selected" : ""}>${escapeHtml(optionLabel)}</option>`).join("")}</select>`;
+                  } else {
+                    control = `<input class="dialog-control" id="${inputId}" name="${key}" type="${fieldType === "number" ? "number" : "text"}" value="${escapeHtml(fieldValue)}" ${fieldType === "number" ? 'min="1" step="1"' : ""} ${required ? "required" : ""}>`;
+                  }
+                  const labelTarget = fieldType === "resources" ? "create-resources-picker" : inputId;
+                  return `<div class="dialog-field ${wide ? "wide" : ""}"><label for="${labelTarget}">${escapeHtml(label)}${required ? " *" : ""}</label>${control}</div>`;
+                }).join("")}
+                <p class="dialog-error" id="create-error" role="alert" ${createError ? "" : "hidden"}>${escapeHtml(createError)}</p>
+              </div>
+              <div class="dialog-footer"><button class="button" type="button" data-close-create>Cancel</button><button class="button create-button" type="submit" ${createSubmitting ? "disabled" : ""}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>${createSubmitting ? "Creating…" : `Create ${createLabel}`}</button></div>
+            </form>
+          </section>
+        </div>` : "";
+      const editDialog = editOriginal && editModalPage === activePage ? `
+        <div class="modal-backdrop" data-modal-backdrop="edit">
+          <section class="create-dialog" role="dialog" aria-modal="true" aria-labelledby="edit-dialog-title">
+            <div class="dialog-head">
+              <div><h2 class="dialog-title" id="edit-dialog-title">Edit ${escapeHtml(rowLabel(activePage, editOriginal))}</h2><p class="dialog-subtitle">Update any field in this record. Changes are saved directly to Supabase.</p></div>
+              <button class="dialog-close" type="button" data-close-edit aria-label="Close dialog">×</button>
+            </div>
+            <form class="create-form" id="edit-form">
+              <div class="dialog-fields">${Object.entries(editOriginal).filter(([key]) => !key.startsWith("_")).map(([key, originalValue]) => {
+                const fieldValue = String(editDraft[key] ?? "");
+                const label = key.replace(/_/g, " ").replace(/\b\w/g, char => char.toUpperCase());
+                const isStructured = originalValue !== null && typeof originalValue === "object";
+                let control;
+                if (typeof originalValue === "boolean") {
+                  control = `<select class="dialog-control" id="edit-${escapeHtml(key)}" name="${escapeHtml(key)}"><option value="true" ${fieldValue === "true" ? "selected" : ""}>True</option><option value="false" ${fieldValue === "false" ? "selected" : ""}>False</option></select>`;
+                } else if (isStructured || (typeof originalValue === "string" && (originalValue.includes("\n") || originalValue.length > 100))) {
+                  control = `<textarea class="dialog-control" id="edit-${escapeHtml(key)}" name="${escapeHtml(key)}">${escapeHtml(fieldValue)}</textarea>`;
+                } else {
+                  control = `<input class="dialog-control" id="edit-${escapeHtml(key)}" name="${escapeHtml(key)}" type="${typeof originalValue === "number" ? "number" : "text"}" ${typeof originalValue === "number" ? 'step="any"' : ""} value="${escapeHtml(fieldValue)}">`;
+                }
+                return `<div class="dialog-field ${isStructured || key === "comments" || key === "details" || key === "description" || key === "update" ? "wide" : ""}"><label for="edit-${escapeHtml(key)}">${escapeHtml(label)}</label>${control}</div>`;
+              }).join("")}<p class="dialog-error" id="edit-error" role="alert" ${editError ? "" : "hidden"}>${escapeHtml(editError)}</p></div>
+              <div class="dialog-footer"><button class="button" type="button" data-close-edit ${editSubmitting ? "disabled" : ""}>Cancel</button><button class="button create-button" type="submit" ${editSubmitting ? "disabled" : ""}>${editSubmitting ? "Saving…" : "Save changes"}</button></div>
+            </form>
+          </section>
+        </div>` : "";
+      const deleteDialog = deleteTarget && deleteModalPage === activePage ? `
+        <div class="modal-backdrop" data-modal-backdrop="delete">
+          <section class="create-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-dialog-title">
+            <div class="dialog-head">
+              <div><h2 class="dialog-title" id="delete-dialog-title">Delete record?</h2><p class="dialog-subtitle">This will permanently remove the record from Supabase.</p></div>
+              <button class="dialog-close" type="button" data-close-delete aria-label="Close dialog" ${deleteSubmitting ? "disabled" : ""}>×</button>
+            </div>
+            <div class="dialog-fields"><p class="delete-copy">You are about to delete <strong>${escapeHtml(rowLabel(activePage, deleteTarget))}</strong>. This action cannot be undone.</p><p class="dialog-error" id="delete-error" role="alert" ${deleteError ? "" : "hidden"}>${escapeHtml(deleteError)}</p></div>
+            <div class="dialog-footer"><button class="button" type="button" data-close-delete ${deleteSubmitting ? "disabled" : ""}>Cancel</button><button class="button danger-button" type="button" id="confirm-delete" ${deleteSubmitting ? "disabled" : ""}>${deleteSubmitting ? "Deleting…" : "Delete permanently"}</button></div>
+          </section>
+        </div>` : "";
+      const resourceSummary = activePage === "resources" ? (() => {
+        const billable = config.rows.filter(row => String(row.billable || "").toUpperCase() === "Y").length;
+        const onsite = config.rows.filter(row => String(row.location || "").toLowerCase() === "onsite").length;
+        const assigned = config.rows.filter(row => [row.project1, row.project2, row.project3].some(Boolean)).length;
+        const summaryMetrics = [
+          ["Total resources", config.rows.length, "Current roster in the AI Resources tracker", "#1978a5"],
+          ["Billable", billable, `${Math.round((billable / Math.max(config.rows.length, 1)) * 100)}% of the team`, "#16897f"],
+          ["Onsite", onsite, `${Math.round((onsite / Math.max(config.rows.length, 1)) * 100)}% on-site`, "#3e6998"],
+          ["Assigned", assigned, "Resources with active project allocation", "#c18132"]
+        ];
+        return `<section class="metrics" aria-label="AI resources summary">${summaryMetrics.map(([label, value, note, color]) => `<article class="metric" style="--metric-color:${color}"><div class="metric-label">${label}</div><div class="metric-value">${value}</div><div class="metric-note">${note}</div></article>`).join("")}</section>`;
+      })() : "";
+
+      content.innerHTML = `<div class="page-enter${animatePage ? "" : " no-enter"}">
+        <div class="page-heading"><div><div class="eyebrow">${meta.eyebrow}</div><h1>${meta.title}</h1><p class="page-subtitle">${meta.subtitle}</p></div><div class="heading-actions"><div class="snapshot">Source snapshot <strong>20 Aug</strong></div>${["clients", "internal", "resources", "interns"].includes(activePage) ? `<button class="button create-button" type="button" id="open-create"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Create ${createLabel}</button>` : ""}</div></div>
+        ${resourceSummary}
+        <section class="panel filter-panel"><div class="filter-row"><div class="field search-field"><label for="search-field">Search this sheet</label><input class="control" id="search-field" type="search" placeholder="Search names, projects, notes…" value="${escapeHtml(state.query || "")}"></div>${filters}<div class="filter-actions"><button class="button" type="button" id="clear-filters">Clear filters</button></div></div></section>
+        ${createNotices[activePage] ? `<div class="notice" role="alert">${escapeHtml(createNotices[activePage])}</div>` : ""}
+        <section class="panel table-panel"><div class="table-toolbar"><div class="result-count"><strong>${rows.length}</strong> of ${config.rows.length} records</div>${isSaving ? '<span class="save-progress" role="status">Saving new record to Supabase…</span>' : editSubmitting ? '<span class="save-progress" role="status">Saving changes to Supabase…</span>' : deleteSubmitting ? '<span class="save-progress" role="status">Deleting record from Supabase…</span>' : ""}</div><div class="table-wrap"><table><thead><tr>${headings}</tr></thead><tbody>${body}</tbody></table></div></section>
+      </div>${createDialog}${editDialog}${deleteDialog}`;
+      content.querySelector("#create-form")?.addEventListener("submit", handleCreateSubmission);
+      content.querySelector("#edit-form")?.addEventListener("submit", handleEditSubmission);
+      animateDisplayedCounts();
+      animateDashboardBars();
+    }
+
+    function render({ animatePage = true } = {}) {
+      const meta = pageMeta[activePage];
+      document.getElementById("crumb-title").textContent = meta.label;
+      document.querySelectorAll(".nav button").forEach(button => button.setAttribute("aria-current", button.dataset.page === activePage ? "page" : "false"));
+      if (activePage === "overview") renderOverview({ animatePage }); else renderDataPage({ animatePage });
+    }
+
+    function clearFilters() {
+      activeFilters[activePage] = {};
+      sortState = { key: "id", direction: 1 };
+      render({ animatePage: false });
+    }
+
+    document.querySelector(".nav").addEventListener("click", event => {
+      const button = event.target.closest("[data-page]");
+      if (!button) return;
+      activePage = button.dataset.page;
+      sortState = { key: tableConfig[activePage]?.columns[0][0] || "id", direction: 1 };
+      render();
+    });
+    content.addEventListener("click", event => {
+      const editButton = event.target.closest("[data-edit-row]");
+      if (editButton) {
+        const row = portfolio[activePage][Number(editButton.dataset.editRow)];
+        if (!row || row._pendingCreate || !mutationMatchMode(activePage, row)) return;
+        editOriginal = row;
+        editModalPage = activePage;
+        editDraft = Object.fromEntries(Object.entries(row).filter(([key]) => !key.startsWith("_")).map(([key, value]) => [
+          key,
+          value !== null && typeof value === "object" ? JSON.stringify(value, null, 2) : String(value ?? "")
+        ]));
+        editSubmitting = false;
+        editError = "";
+        renderDataPage();
+        content.querySelector("#edit-form input, #edit-form textarea, #edit-form select")?.focus();
+        return;
+      }
+      const deleteButton = event.target.closest("[data-delete-row]");
+      if (deleteButton) {
+        deleteTarget = portfolio[activePage][Number(deleteButton.dataset.deleteRow)];
+        if (!deleteTarget || deleteTarget._pendingCreate || !mutationMatchMode(activePage, deleteTarget)) return;
+        deleteModalPage = activePage;
+        deleteSubmitting = false;
+        deleteError = "";
+        renderDataPage();
+        return;
+      }
+      if (event.target.closest("#confirm-delete")) {
+        handleDeleteConfirmation();
+        return;
+      }
+      const goto = event.target.closest("[data-goto]");
+      if (goto) { activePage = goto.dataset.goto; sortState = { key: tableConfig[activePage].columns[0][0], direction: 1 }; render(); return; }
+      const sort = event.target.closest("[data-sort]");
+      if (sort) { const key = sort.dataset.sort; sortState = { key, direction: sortState.key === key ? -sortState.direction : 1 }; renderDataPage(); return; }
+      if (event.target.closest("#clear-filters")) clearFilters();
+      if (event.target.closest("#open-create")) {
+        createError = "";
+        createNotices[activePage] = "";
+        createFormDraft = {};
+        selectedCreateResources = [];
+        createModalOpen = true;
+        renderDataPage();
+        content.querySelector("#create-id, #create-name, #create-client")?.focus();
+        return;
+      }
+      if (event.target.closest("#add-resource")) {
+        const picker = content.querySelector("#create-resources-picker");
+        const value = picker?.value;
+        if (value && !selectedCreateResources.includes(value)) selectedCreateResources.push(value);
+        if (picker) picker.value = "";
+        updateSelectedResources();
+        return;
+      }
+      const removeResource = event.target.closest("[data-remove-resource]");
+      if (removeResource) {
+        selectedCreateResources.splice(Number(removeResource.dataset.removeResource), 1);
+        updateSelectedResources();
+        return;
+      }
+      if (event.target.closest("[data-close-create]") || event.target.matches('[data-modal-backdrop="create"]')) {
+        createModalOpen = false;
+        createSubmitting = false;
+        createError = "";
+        selectedCreateResources = [];
+        renderDataPage();
+        return;
+      }
+      if (event.target.closest("[data-close-edit]") || event.target.matches('[data-modal-backdrop="edit"]')) {
+        if (editSubmitting) return;
+        editOriginal = null;
+        editModalPage = null;
+        editDraft = {};
+        editError = "";
+        renderDataPage();
+        return;
+      }
+      if (event.target.closest("[data-close-delete]") || event.target.matches('[data-modal-backdrop="delete"]')) {
+        if (deleteSubmitting) return;
+        deleteTarget = null;
+        deleteModalPage = null;
+        deleteError = "";
+        renderDataPage();
+      }
+    });
+    function updateSelectedResources() {
+      const selections = content.querySelector("#resource-selections");
+      const input = content.querySelector("#create-resources-value");
+      if (!selections || !input) return;
+      input.value = selectedCreateResources.join(", ");
+      selections.innerHTML = selectedCreateResources.map((name, index) => `<span class="resource-chip">${escapeHtml(name)}<button type="button" data-remove-resource="${index}" aria-label="Remove ${escapeHtml(name)}">×</button></span>`).join("");
+    }
+    async function handleCreateSubmission(event) {
+      event.preventDefault();
+      if (createSubmitting) return;
+      if (!supabaseClient) {
+        createError = "The project tracker is not connected, so this record could not be saved.";
+        content.querySelector("#create-error").textContent = createError;
+        content.querySelector("#create-error").hidden = false;
+        return;
+      }
+      const page = activePage;
+      const formData = new FormData(event.target);
+      createFormDraft = Object.fromEntries([...formData.entries()].map(([key, value]) => [key, String(value).trim()]));
+      const record = Object.fromEntries(Object.entries(createFormDraft).map(([key, value]) => [
+        key,
+        value ? key === "number" ? Number(value) : value : null
+      ]));
+      const optimisticKey = `pending-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const optimisticRecord = { ...record, _pendingCreate: true, _optimisticKey: optimisticKey };
+      portfolio[page].unshift(optimisticRecord);
+      tableConfig[page].rows = portfolio[page];
+      activeFilters[page] = {};
+      createSubmitting = true;
+      createError = "";
+      createNotices[page] = "";
+      createModalOpen = false;
+      selectedCreateResources = [];
+      render();
+      try {
+        const { data: savedRecord, error } = await supabaseClient
+          .from(SUPABASE_CONFIG.tables[page])
+          .insert(record)
+          .select("*")
+          .single();
+        if (error) throw new Error(error.message);
+        if (!savedRecord) throw new Error("Supabase did not return the saved record.");
+        const existingIndex = portfolio[page].findIndex(row => row._optimisticKey === optimisticKey || String(recordKey(page, row)) === String(recordKey(page, savedRecord)));
+        if (existingIndex >= 0) portfolio[page][existingIndex] = savedRecord;
+        else portfolio[page].unshift(savedRecord);
+        tableConfig[page].rows = portfolio[page];
+        activeFilters[page] = {};
+        createSubmitting = false;
+        createError = "";
+        selectedCreateResources = [];
+        render();
+      } catch (error) {
+        console.error(`Supabase insert failed for ${SUPABASE_CONFIG.tables[page]}:`, error);
+        portfolio[page] = portfolio[page].filter(row => row._optimisticKey !== optimisticKey);
+        tableConfig[page].rows = portfolio[page];
+        createSubmitting = false;
+        const errorMessage = error.message || "Please check the tracker connection and try again.";
+        const itemName = page === "clients" ? "project" : page === "internal" ? "deliverable" : page === "resources" ? "resource" : "intern";
+        createError = /row-level security policy/i.test(errorMessage)
+          ? `Supabase is blocking anonymous inserts for ${SUPABASE_CONFIG.tables[page]}. Apply the development insert policy from supabase-dev-project-inserts.sql in the Supabase SQL Editor, then try again.`
+          : `Could not create this ${itemName}: ${errorMessage}`;
+        createNotices[page] = createError;
+        if (activePage === page) {
+          createModalOpen = true;
+          selectedCreateResources = (createFormDraft.resources || "").split(", ").filter(Boolean);
+        }
+        render();
+      }
+    }
+    async function handleEditSubmission(event) {
+      event.preventDefault();
+      if (editSubmitting || !editOriginal || !editModalPage) return;
+      if (!supabaseClient) {
+        editError = "The project tracker is not connected, so these changes could not be saved.";
+        renderDataPage();
+        return;
+      }
+
+      const page = editModalPage;
+      const original = editOriginal;
+      const originalKey = recordKey(page, original);
+      const matchMode = mutationMatchMode(page, original);
+      const formData = new FormData(event.target);
+      editDraft = Object.fromEntries([...formData.entries()].map(([key, value]) => [key, String(value)]));
+      const updatedRecord = {};
+      try {
+        for (const [key, value] of Object.entries(editDraft)) {
+          const originalValue = original[key];
+          if (typeof originalValue === "boolean") {
+            updatedRecord[key] = value === "true";
+          } else if (typeof originalValue === "number") {
+            updatedRecord[key] = value.trim() === "" ? null : Number(value);
+            if (updatedRecord[key] !== null && !Number.isFinite(updatedRecord[key])) {
+              throw new Error(`${key} must be a valid number.`);
+            }
+          } else if (originalValue !== null && typeof originalValue === "object") {
+            updatedRecord[key] = value.trim() === "" ? null : JSON.parse(value);
+          } else {
+            updatedRecord[key] = value.trim() === "" ? null : value.trim();
+          }
+        }
+      } catch (error) {
+        editError = error instanceof SyntaxError
+          ? "A structured field contains invalid JSON. Correct it and try saving again."
+          : error.message;
+        renderDataPage();
+        return;
+      }
+
+      editSubmitting = true;
+      editError = "";
+      renderDataPage();
+      try {
+        const updateQuery = supabaseClient
+          .from(SUPABASE_CONFIG.tables[page])
+          .update(updatedRecord);
+        const { data: savedRecord, error } = await addMutationFilter(updateQuery, page, original)
+          .select("*")
+          .single();
+        if (error) throw new Error(error.message);
+        if (!savedRecord) throw new Error("Supabase did not return the updated record.");
+        let replaceIndex = portfolio[page].indexOf(original);
+        if (replaceIndex < 0 && matchMode === "key") {
+          replaceIndex = portfolio[page].findIndex(row => String(recordKey(page, row)) === String(originalKey));
+        }
+        if (replaceIndex < 0 && matchMode === "row") {
+          const fields = Object.keys(original).filter(field => !field.startsWith("_"));
+          replaceIndex = portfolio[page].findIndex(row => fields.every(field => Object.is(row[field], original[field])));
+        }
+        if (replaceIndex >= 0) portfolio[page][replaceIndex] = savedRecord;
+        tableConfig[page].rows = portfolio[page];
+        editOriginal = null;
+        editModalPage = null;
+        editDraft = {};
+        editSubmitting = false;
+        editError = "";
+        render();
+      } catch (error) {
+        console.error(`Supabase update failed for ${SUPABASE_CONFIG.tables[page]}:`, error);
+        editSubmitting = false;
+        editError = `Could not save changes: ${error.message || "Please check the tracker connection and try again."}`;
+        renderDataPage();
+      }
+    }
+    async function handleDeleteConfirmation() {
+      if (deleteSubmitting || !deleteTarget || !deleteModalPage) return;
+      if (!supabaseClient) {
+        deleteError = "The project tracker is not connected, so this record could not be deleted.";
+        renderDataPage();
+        return;
+      }
+
+      const page = deleteModalPage;
+      const target = deleteTarget;
+      const key = recordKey(page, target);
+      const matchMode = mutationMatchMode(page, target);
+      deleteSubmitting = true;
+      deleteError = "";
+      renderDataPage();
+      try {
+        const deleteQuery = supabaseClient
+          .from(SUPABASE_CONFIG.tables[page])
+          .delete();
+        const { data: deletedRecord, error } = await addMutationFilter(deleteQuery, page, target)
+          .select(primaryKeyByPage[page])
+          .single();
+        if (error) throw new Error(error.message);
+        if (!deletedRecord) throw new Error("Supabase did not confirm the deleted record.");
+        let removeIndex = portfolio[page].indexOf(target);
+        if (removeIndex < 0 && matchMode === "key") {
+          removeIndex = portfolio[page].findIndex(row => String(recordKey(page, row)) === String(key));
+        }
+        if (removeIndex >= 0) portfolio[page].splice(removeIndex, 1);
+        tableConfig[page].rows = portfolio[page];
+        deleteTarget = null;
+        deleteModalPage = null;
+        deleteSubmitting = false;
+        deleteError = "";
+        render();
+      } catch (error) {
+        console.error(`Supabase delete failed for ${SUPABASE_CONFIG.tables[page]}:`, error);
+        deleteSubmitting = false;
+        deleteError = `Could not delete this record: ${error.message || "Please check the tracker connection and try again."}`;
+        renderDataPage();
+      }
+    }
+    content.addEventListener("input", event => {
+      if (event.target.id !== "search-field") return;
+      activeFilters[activePage] = { ...(activeFilters[activePage] || {}), query: event.target.value };
+      const cursor = event.target.selectionStart;
+      renderDataPage();
+      const input = document.getElementById("search-field"); input.focus(); input.setSelectionRange(cursor, cursor);
+    });
+    content.addEventListener("change", event => {
+      const key = event.target.dataset.filter;
+      if (!key) return;
+      activeFilters[activePage] = { ...(activeFilters[activePage] || {}), [key]: event.target.value };
+      renderDataPage();
+    });
+    document.getElementById("reset-button").addEventListener("click", clearFilters);
+    function downloadBlob(blob, fileName) {
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = fileName;
+      anchor.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function exportCsv(headers, rows, fileName) {
+      const csvValue = value => {
+        const text = String(value ?? "");
+        const safeText = /^\s*[=+\-@]/.test(text) ? `'${text}` : text;
+        return `"${safeText.replace(/"/g, '""')}"`;
+      };
+      const csv = [headers, ...rows].map(row => row.map(csvValue).join(",")).join("\r\n");
+      downloadBlob(new Blob(["\ufeff", csv], { type: "text/csv;charset=utf-8" }), fileName);
+    }
+
+    const EXPORT_PAGES = ["clients", "internal", "resources", "interns"];
+    const exportSheetData = (page, useActiveSort = false) => {
+      const config = tableConfig[page];
+      const sort = useActiveSort ? sortState : { key: config.columns[0][0], direction: 1 };
+      const rows = filteredRows(config, page, sort).map(row => config.columns.map(([key]) => getCell(row, key)));
+      return { page, title: pageMeta[page].label, headers: config.columns.map(([, label]) => label), rows };
+    };
+
+    async function exportCurrentPage() {
+      const exportDate = new Date().toISOString().slice(0, 10);
+      const isOverview = activePage === "overview";
+      const sheets = isOverview
+        ? EXPORT_PAGES.map(page => exportSheetData(page))
+        : [exportSheetData(activePage, true)];
+      const fileBase = isOverview
+        ? `AI Workforce Management ${exportDate}`
+        : `${sheets[0].title} ${exportDate}`;
+      if (typeof ExcelJS === "undefined") {
+        try {
+          sheets.forEach(sheet => exportCsv(sheet.headers, sheet.rows, `${sheet.title} ${exportDate}.csv`));
+          window.alert(isOverview
+            ? "Excel formatting is unavailable. Downloaded each filtered sheet as a separate CSV file that can be opened in Excel."
+            : "Excel formatting is unavailable. A CSV file was downloaded and can be opened in Excel.");
+        } catch (error) {
+          console.error("Could not export the filtered portfolio as CSV:", error);
+          window.alert("Could not download the export. Please try again.");
+        }
+        return;
+      }
+
+      try {
+        const workbook = new ExcelJS.Workbook();
+        sheets.forEach(sheet => {
+          const worksheet = workbook.addWorksheet(`${sheet.title} ${exportDate}`.slice(0, 31));
+          worksheet.views = [{ state: "frozen", ySplit: 1 }];
+          worksheet.addTable({
+            name: `Portfolio_${sheet.page}`,
+            ref: "A1",
+            headerRow: true,
+            totalsRow: false,
+            style: { theme: "TableStyleMedium2", showRowStripes: true },
+            columns: sheet.headers.map(name => ({ name })),
+            rows: sheet.rows
+          });
+        });
+        const contents = await workbook.xlsx.writeBuffer();
+        downloadBlob(new Blob([contents], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), `${fileBase}.xlsx`);
+      } catch (error) {
+        console.error("Could not create the Excel portfolio export:", error);
+        try {
+          sheets.forEach(sheet => exportCsv(sheet.headers, sheet.rows, `${sheet.title} ${exportDate}.csv`));
+          window.alert(isOverview
+            ? "Excel export failed. Downloaded each filtered sheet as a separate CSV file that can be opened in Excel."
+            : "Excel export failed. A CSV file was downloaded and can be opened in Excel.");
+        } catch (fallbackError) {
+          console.error("Could not export the filtered portfolio as CSV:", fallbackError);
+          window.alert("Could not download the export. Please try again.");
+        }
+      }
+    }
+    document.getElementById("export-button").addEventListener("click", exportCurrentPage);
+
+    initSupabaseLiveSync();
+    render();
+  </script>
+</body>
+</html>
