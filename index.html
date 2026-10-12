@@ -137,7 +137,7 @@
     .phase-group { display: grid; grid-template-columns: 125px minmax(0,1fr) 28px; align-items: center; gap: 11px; }
     .phase-label { overflow: hidden; color: #4e6175; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
     .bar-track { height: 9px; overflow: hidden; border-radius: 9px; background: #e8eef1; }
-    .bar-fill { height: 100%; min-width: 3px; border-radius: inherit; background: linear-gradient(90deg, #1679a8, #42a99a); transition: width .45s ease; }
+    .bar-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #1679a8, #42a99a); transition: width .45s ease; }
     .phase-count { color: #304a60; font-size: 11px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
     .mini-chart { display: grid; gap: 12px; }
     .mini-row { display: grid; grid-template-columns: 104px minmax(0,1fr) 43px; align-items: center; gap: 10px; }
@@ -370,7 +370,8 @@
         const label = element.closest(".phase-group")?.querySelector(".phase-label")?.textContent.trim()
           || element.closest(".mini-row")?.querySelector(".mini-label")?.textContent.trim();
         if (!label) return;
-        const key = `${activePage}:bar:${label}`;
+        const chart = element.closest(".panel")?.querySelector(".panel-title")?.textContent.trim() || "";
+        const key = `${activePage}:bar:${chart}:${label}`;
         const target = Number.parseFloat(element.style.width) || 0;
         const previous = animatedBarWidths.get(key);
         animatedBarWidths.set(key, target);
@@ -553,22 +554,35 @@
     }
 
     function phaseTone(phase) {
-      const value = String(phase || "").toLowerCase();
+      const value = normalizePhase(phase).toLowerCase();
       if (value.includes("yet to be")) return "amber";
       if (value.includes("development")) return "blue";
       if (value.includes("incubation")) return "amber";
       return "green";
     }
 
+    function normalizePhase(phase) {
+      const value = String(phase ?? "").trim();
+      if (!value) return "Not recorded";
+      return /^yet to be start(?:ed|red)$/i.test(value) ? "Yet to be started" : value;
+    }
+
     function phaseBreakdown(rows) {
       const counts = new Map();
-      rows.forEach(row => counts.set(row.phase || "Not recorded", (counts.get(row.phase || "Not recorded") || 0) + 1));
-      return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+      rows.forEach(row => {
+        const label = normalizePhase(row.phase);
+        const key = label.toLowerCase();
+        const current = counts.get(key);
+        counts.set(key, { label: current?.label || label, count: (current?.count || 0) + 1 });
+      });
+      return [...counts.values()]
+        .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
+        .map(({ label, count }) => [label, count]);
     }
 
     function renderBars(rows, className = "phase-groups") {
       const max = Math.max(1, ...rows.map(([, count]) => count));
-      return `<div class="${className}">${rows.map(([label, count]) => `<div class="${className === "mini-chart" ? "mini-row" : "phase-group"}"><span class="${className === "mini-chart" ? "mini-label" : "phase-label"}">${escapeHtml(label)}</span><span class="bar-track"><span class="bar-fill" style="display:block;width:${Math.max(3, count / max * 100)}%"></span></span><span class="${className === "mini-chart" ? "mini-value" : "phase-count"}">${count}</span></div>`).join("")}</div>`;
+      return `<div class="${className}">${rows.map(([label, count]) => `<div class="${className === "mini-chart" ? "mini-row" : "phase-group"}"><span class="${className === "mini-chart" ? "mini-label" : "phase-label"}">${escapeHtml(label)}</span><span class="bar-track"><span class="bar-fill" style="display:block;width:${count ? Math.max(3, count / max * 100) : 0}%"></span></span><span class="${className === "mini-chart" ? "mini-value" : "phase-count"}">${count}</span></div>`).join("")}</div>`;
     }
 
     function renderOverview({ animatePage = true } = {}) {
@@ -577,7 +591,7 @@
       const billableCount = portfolio.resources.filter(row => String(row.billable ?? "").trim().toUpperCase() === "Y").length;
       const notBillableCount = portfolio.resources.filter(row => String(row.billable ?? "").trim().toUpperCase() === "N").length;
       const tbdCommercial = portfolio.clients.filter(row => row.billing === "TBD" || row.sow === "TBD").length;
-      const pipeline = portfolio.clients.filter(row => row.phase === "Yet to be started");
+      const pipeline = portfolio.clients.filter(row => normalizePhase(row.phase) === "Yet to be started");
       const metrics = [
         ["Client projects", portfolio.clients.length, `${clientPhases.find(([phase]) => phase === "Development")?.[1] || 0} in development`, "#1978a5"],
         ["Internal initiatives", portfolio.internal.length, `${internalPhases.find(([phase]) => phase === "UAT")?.[1] || 0} in UAT`, "#16897f"],
